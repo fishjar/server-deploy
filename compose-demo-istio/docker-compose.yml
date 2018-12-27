@@ -1,0 +1,81 @@
+version: "2"
+
+services:
+  app1-v1:
+    image: 127.0.0.1/testprj/app1-v1:1.1
+    # env_file:
+    #   - ./app.env
+    networks:
+      istiomesh:
+    dns:
+      - 172.28.0.1
+      - 8.8.8.8
+    dns_search:
+        - service.consul
+    environment:
+      - SERVICE_NAME=app1
+      - SERVICE_TAGS=version|v1
+      - SERVICE_PROTOCOL=http
+    expose:
+      - "3000"
+  app2-v1:
+    image: 127.0.0.1/testprj/app2-v1:1.1
+    # env_file:
+    #   - ./app.env
+    networks:
+      istiomesh:
+    dns:
+      - 172.28.0.1
+      - 8.8.8.8
+    dns_search:
+        - service.consul
+    environment:
+      - SERVICE_NAME=app2
+      - SERVICE_TAGS=version|v1
+      - SERVICE_PROTOCOL=http
+    expose:
+      - "3000"
+  gw1-v1:
+    image: 127.0.0.1/testprj/gw1-v1:1.1
+    # env_file:
+    #   - ./app.env
+    ports:
+      - 9001:3000
+    networks:
+      istiomesh:
+        ipv4_address: 172.28.0.14
+    dns:
+      - 172.28.0.1
+      - 8.8.8.8
+    dns_search:
+        - service.consul
+    environment:
+      - SERVICE_NAME=gw1
+      - SERVICE_TAGS=version|v1
+      - SERVICE_PROTOCOL=http
+    expose:
+      - "3000"
+  gw2-v1:
+    image: 127.0.0.1/testprj/gw2-v1:1.1
+    # env_file:
+    #   - ./app.env
+    ports:
+      - 9002:3000
+    networks:
+      istiomesh:
+        ipv4_address: 172.28.0.15
+    dns:
+      - 172.28.0.1
+      - 8.8.8.8
+    dns_search:
+        - service.consul
+    environment:
+      - SERVICE_NAME=gw2
+      - SERVICE_TAGS=version|v1
+      - SERVICE_PROTOCOL=http
+    expose:
+      - "3000"
+networks:
+  istiomesh:
+    external:
+      name: consul_istiomesh

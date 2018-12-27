@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  app1:
+    build: ./app1
+    # image: compose-demo/app1:v1
+    # container_name: app1_v1
+    # environment:
+    #   PORT: "3000"
+    # deploy:
+    #   replicas: 2
+    env_file:
+      - ./app.env
+    networks:
+      - appnet
+  app2:
+    build: ./app2
+    env_file:
+      - ./app.env
+    networks:
+      - appnet
+  gw1:
+    build: ./gw1
+    env_file:
+      - ./app.env
+    ports:
+      - 9001:3000
+    networks:
+      - appnet
+  gw2:
+    build: ./gw2
+    env_file:
+      - ./app.env
+    ports:
+      - 9002:3000
+    networks:
+      - appnet
+networks:
+  appnet:

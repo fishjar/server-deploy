@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  proxy:
+    image: traefik
+    command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
+    networks:
+      - appnet
+    ports:
+      - "8001:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  app1:
+    build: ./app1
+    env_file:
+      - ./app.env
+    networks:
+      - appnet
+  app2:
+    build: ./app2
+    env_file:
+      - ./app.env
+    networks:
+      - appnet
+  gw1:
+    build: ./gw1
+    env_file:
+      - ./app.env
+    # ports:
+    #   - 9001:3000
+    networks:
+      - appnet
+    expose:
+      - "3000"
+    labels:
+      - "traefik.backend=gw1"
+      - "traefik.frontend.rule=Host:gw1.docker.localhost"
+  gw2:
+    build: ./gw2
+    env_file:
+      - ./app.env
+    # ports:
+    #   - 9002:3000
+    networks:
+      - appnet
+    expose:
+      - "3000"
+    labels:
+      - "traefik.backend=gw2"
+      - "traefik.frontend.rule=Host:gw2.docker.localhost"
+networks:
+  appnet:
