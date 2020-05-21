@@ -177,6 +177,11 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 docker swarm join-token manager
 # 查看worker加入连接
 docker swarm join-token worker
+# 只打印token
+docker swarm join-token --quiet worker
+# 使旧token失效
+docker swarm join-token --rotate worker
+
 
 # 检查节点
 docker node ls
