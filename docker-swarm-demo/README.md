@@ -145,7 +145,7 @@ sudo docker run hello-world
 
 ## docker swarm 配置
 
-### 设置 hostname
+### 设置 hostname (可略)
 
 ```sh
 export USE_HOSTNAME=dog.example.com
@@ -180,6 +180,178 @@ docker swarm join-token worker
 
 # 检查节点
 docker node ls
+# Run docker info to view the current state of the swarm:
+docker info
+
+
+# 创建服务
+docker service create --name demo alpine:3.5 ping 8.8.8.8
+docker service create --replicas 1 --name helloworld alpine ping docker.com
+# 检查服务
+docker service ls
+# Inspect a service on the swarm
+docker service inspect --pretty helloworld
+docker service inspect helloworld
+# Run docker service ps <SERVICE-ID> to see which nodes are running the service:
+docker service ps demo
+docker service ps helloworld
+# 查看服务日志
+docker service logs demo
+# Run docker ps on the node where the task is running to see details about the container for the task.
+docker ps
+# Scale the service in the swarm
+docker service scale helloworld=5
+# 移除服务
+docker service rm demo
+docker service rm helloworld
+
+
+## Apply rolling updates to a service
+## 滚动更新服务
+# --update-parallelism flag to configure the maximum number of service tasks
+docker service create \
+  --replicas 3 \
+  --name redis \
+  --update-delay 10s \
+  redis:3.0.6
+# update the container image for redis
+docker service update --image redis:3.0.7 redis
+# To restart a paused update run docker service update <SERVICE-ID>. For example
+docker service update redis
+# Run docker service ps <SERVICE-ID> to watch the rolling update:
+docker service ps redis
+
+
+# 排空节点
+docker node update --availability drain worker1
+# 启用节点
+docker node update --availability active worker1
+
+
+# 暴露服务端口
+# 访问地址 <节点IP>:8080
+docker service create \
+  --name my-web \
+  --publish published=8080,target=80 \
+  --replicas 2 \
+  nginx
+# You can publish a port for an existing service using the following command:
+docker service update \
+  --publish-add published=<PUBLISHED-PORT>,target=<CONTAINER-PORT> \
+  <SERVICE>
+# You can use docker service inspect to view the service’s published port. For instance:
+docker service inspect --format="{{json .Endpoint.Spec.Ports}}" my-web
+
+
+# Publish a port for TCP only or UDP only
+## TCP ONLY
+### Long syntax:
+docker service create --name dns-cache \
+  --publish published=53,target=53 \
+  dns-cache
+### Short syntax:
+docker service create --name dns-cache \
+  -p 53:53 \
+  dns-cache
+## TCP AND UDP
+### Long syntax:
+docker service create --name dns-cache \
+  --publish published=53,target=53 \
+  --publish published=53,target=53,protocol=udp \
+  dns-cache
+### Short syntax:
+docker service create --name dns-cache \
+  -p 53:53 \
+  -p 53:53/udp \
+  dns-cache
+## UDP ONLY
+### Long syntax:
+docker service create --name dns-cache \
+  --publish published=53,target=53,protocol=udp \
+  dns-cache
+### Short syntax:
+docker service create --name dns-cache \
+  -p 53:53/udp \
+  dns-cache
+
+# Bypass the routing mesh
+# 必须使用 长语法 --publish 标识，并且mode设为host
+# 如果 mode 不设置，或者设为 ingress 则使用routing mesh
+docker service create --name dns-cache \
+  --publish published=53,target=53,protocol=udp,mode=host \
+  --mode global \
+  dns-cache
+
+
+# 部署集群服务
+docker stack deploy -c bb-stack.yaml demo
+# 查看集群服务
+docker stack ls
+# 移除集群服务
+docker stack rm demo
+```
+
+### 外部负载均衡
+
+ you could have the following HAProxy configuration in `/etc/haproxy/haproxy.cfg`
+
+```conf
+global
+        log /dev/log    local0
+        log /dev/log    local1 notice
+...snip...
+
+# Configure HAProxy to listen on port 80
+frontend http_front
+   bind *:80
+   stats uri /haproxy?stats
+   default_backend http_back
+
+# Configure HAProxy to route requests to swarm nodes on port 8080
+backend http_back
+   balance roundrobin
+   server node1 192.168.99.100:8080 check
+   server node2 192.168.99.101:8080 check
+   server node3 192.168.99.102:8080 check
+```
+
+### Configure and run Prometheus （可选）
+
+修改配置`/etc/docker/daemon.json`
+
+```json
+{
+  "metrics-addr" : "127.0.0.1:9323",
+  "experimental" : true
+}
+```
+
+```sh
+# 重启docker
+sudo systemctl daemon-reload && sudo systemctl restart docker
+
+# start a single-replica Prometheus service using this configuration
+# docker service create --replicas 1 --name my-prometheus \
+#     --mount type=bind,source=/tmp/prometheus.yml,destination=/etc/prometheus/prometheus.yml \
+#     --publish published=9090,target=9090,protocol=tcp \
+#     prom/prometheus
+docker service create --replicas 1 --name my-prometheus \
+    --mount type=bind,source=/home/vagrant/prometheus.yml,destination=/etc/prometheus/prometheus.yml \
+    --publish published=9090,target=9090,protocol=tcp \
+    prom/prometheus
+
+# 查看
+# Verify that the Docker target is listed at 
+# http://localhost:9090/targets/
+
+# 测试
+docker service create \
+  --replicas 10 \
+  --name ping_service \
+  alpine ping docker.com
+
+# 移除
+docker service remove ping_service
 ```
 
 ## Traefik && Consul
@@ -299,7 +471,7 @@ docker stack deploy -c traefik-host.yml traefik-consul
 sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
-# If the command docker-compose fails after installation, 
+# If the command docker-compose fails after installation,
 # check your path. You can also create a symbolic link to /usr/bin or any other directory in your path.
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
