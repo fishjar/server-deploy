@@ -152,6 +152,26 @@ docker stack deploy -c traefik-host.yml traefik-consul
 
 ## 部署 swarmprom 监控工具集
 
+- https://grafana.example.com
+- https://alertmanager.example.com
+- https://unsee.example.com
+- https://prometheus.example.com
+
+```sh
+# $ git clone https://github.com/stefanprodan/swarmprom.git
+# $ cd swarmprom
+export ADMIN_USER=admin
+export ADMIN_PASSWORD=changethis
+export HASHED_PASSWORD=$(openssl passwd -apr1 $ADMIN_PASSWORD)
+export DOMAIN=example.com
+export TRAEFIK_PUBLIC_TAG=traefik-public
+export SLACK_URL=https://hooks.slack.com/services/TOKEN
+export SLACK_CHANNEL=devops-alerts
+export SLACK_USER=alertmanager
+
+docker stack deploy -c docker-compose.swarmprom.yml swarmprom
+```
+
 ## 部署 swarmpit 集群管理
 
 ## 部署 portainer 集群管理
