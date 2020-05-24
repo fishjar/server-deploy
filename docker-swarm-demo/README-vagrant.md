@@ -126,10 +126,15 @@ apt-cache madison docker-ce-cli
 # 安装
 # sudo apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
 # sudo apt-get install -y docker-ce=5:18.09.0~3-0~ubuntu-xenial docker-ce-cli=5:18.09.0~3-0~ubuntu-xenial containerd.io
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 # 设置daemon
-# 备选：http://hub-mirror.c.163.com
+# 备选：
+# https://hub-mirror.c.163.com
+# https://docker.mirrors.ustc.edu.cn
+# https://dockerhub.azk8s.cn
+# https://reg-mirror.qiniu.com
+# https://mirror.ccs.tencentyun.com
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
   "registry-mirrors": ["https://registry.docker-cn.com"]
@@ -146,15 +151,17 @@ sudo docker run hello-world
 ## 安装 docker-compose （可选）
 
 ```sh
-sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L https://get.daocloud.io/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-
-# If the command docker-compose fails after installation,
-# check your path. You can also create a symbolic link to /usr/bin or any other directory in your path.
-sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # Test the installation.
 docker-compose --version
+
+# 可选操作
+# If the command docker-compose fails after installation,
+# check your path. You can also create a symbolic link to /usr/bin or any other directory in your path.
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # 部署测试
 docker-compose -f docker-compose-whoami.yaml up --scale whoami=2

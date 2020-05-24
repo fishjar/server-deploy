@@ -59,7 +59,7 @@ export EMAIL=admin@example.com
 
 # Create an environment variable with the domain you want to use
 # for the Traefik UI (user interface) and the Consul UI of the host, e.g.:
-export DOMAIN=sys.example.com
+export DOMAIN=example.com
 # You will access the Traefik UI at traefik.<your domain>, e.g. traefik.sys.example.com
 # and the Consul UI at consul.<your domain>, e.g. consul.sys.example.com.
 # So, make sure that your DNS records point traefik.<your domain>
@@ -149,3 +149,13 @@ curl -L dockerswarm.rocks/traefik-host.yml -o traefik-host.yml
 # 然后部署
 docker stack deploy -c traefik-host.yml traefik-consul
 ```
+
+## 部署 swarmprom 监控工具集
+
+## 部署 swarmpit 集群管理
+
+## 部署 portainer 集群管理
+
+## 部署 thelounge IRC 因特网中继聊天
+
+## 部署 gitlab 代码库

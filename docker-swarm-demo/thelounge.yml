@@ -1,0 +1,28 @@
+version: "3.3"
+
+services:
+  app:
+    image: thelounge/thelounge:latest
+    volumes:
+      - thelounge-data:/var/opt/thelounge
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.labels.thelounge.thelounge-data == true
+      labels:
+        - traefik.frontend.rule=Host:${DOMAIN?Variable DOMAIN not set}
+        - traefik.enable=true
+        - traefik.port=9000
+        - traefik.tags=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.frontend.entryPoints=http,https
+        - traefik.frontend.redirect.entryPoint=https
+
+networks:
+  traefik-public:
+    external: true
+
+volumes:
+  thelounge-data:
