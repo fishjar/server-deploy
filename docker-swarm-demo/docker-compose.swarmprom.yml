@@ -14,11 +14,11 @@ volumes:
 
 configs:
   dockerd_config:
-    file: ./dockerd-exporter/Caddyfile
+    file: ./swarmprom/Caddyfile
   node_rules:
-    file: ./prometheus/rules/swarm_node.rules.yml
+    file: ./swarmprom/swarm_node.rules.yml
   task_rules:
-    file: ./prometheus/rules/swarm_task.rules.yml
+    file: ./swarmprom/swarm_task.rules.yml
 
 services:
   dockerd-exporter:
