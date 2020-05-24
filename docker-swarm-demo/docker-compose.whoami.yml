@@ -2,22 +2,21 @@ version: "3"
 
 services:
   whoami:
-    image: containous/whoami # A container that exposes an API to show its IP address
+    image: containous/whoami
     networks:
-      - default
-      - whoami-public
+      - traefik-public
     deploy:
       mode: replicated
       replicas: 2
       labels:
+        - traefik.frontend.rule=Host:whoami.example.com
         - traefik.enable=true
         - traefik.port=80
-        - traefik.frontend.rule=Host:whoami.example.com
+        - traefik.tags=traefik-public
+        - traefik.docker.network=traefik-public
         - traefik.frontend.entryPoints=http,https
         - traefik.frontend.redirect.entryPoint=https
-        - traefik.tags=traefik-public
-        - traefik.docker.network=whoami-public
 
 networks:
-  whoami-public:
+  traefik-public:
     external: true

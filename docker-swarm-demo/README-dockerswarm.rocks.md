@@ -156,6 +156,19 @@ docker stack deploy -c traefik-host.yml traefik-consul
 
 ## 部署 portainer 集群管理
 
+```sh
+export DOMAIN=sys.example.com
+export NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
+docker node update --label-add portainer.portainer-data=true $NODE_ID
+curl -L dockerswarm.rocks/portainer.yml -o portainer.yml
+
+docker stack deploy -c portainer.yml portainer
+docker stack ps portainer
+
+# 长时间不登录将会关闭，重新启动
+docker service update portainer_portainer --force
+```
+
 ## 部署 thelounge IRC 因特网中继聊天
 
 ## 部署 gitlab 代码库
